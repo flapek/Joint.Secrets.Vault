@@ -111,16 +111,15 @@ namespace Joint.Secrets.Vault
                 Console.WriteLine($"Loading settings from Vault: '{options.Url}', KV path: '{kvPath}'.");
                 var secrets = new KeyValueSecrets(client, options);
                 var source = new MemoryConfigurationSource();
-                var parser = new JsonParser();
-                var parseData = parser.Parse(JObject.FromObject(await secrets.GetAsync(kvPath)));
-
+                var parseData = new JsonParser().Parse(JObject.FromObject(await secrets.GetAsync(kvPath)));
+                
                 if (!options.Kv.AllInOne)
                 {
                     var appSettings = new ConcurrentDictionary<string, string>();
                     foreach (var path in parseData.Values)
                     {
-                        parseData = parser.Parse(JObject.FromObject(await secrets.GetAsync(path)));
-                        foreach (var item in parseData)
+                        var p = new JsonParser().Parse(JObject.FromObject(await secrets.GetAsync(path)));
+                        foreach (var item in p)
                             appSettings.AddOrUpdate(item.Key, item.Value, (oldKey, oldValue) => item.Value);
                     }
 
